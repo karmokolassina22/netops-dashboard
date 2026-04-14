@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+venv/
+.venv/
+*.egg-info/
+
+# Variables d'environnement
+.env
+.env.local
+
+# Logs
+*.log
+logs/
+
+# SSH (JAMAIS dans git)
+*.pem
+*.key
+id_rsa
+id_ed25519
+
+# IDE
+.vscode/
+.idea/
