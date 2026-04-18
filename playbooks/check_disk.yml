@@ -1,0 +1,22 @@
+---
+- name: Vérification de l'espace disque
+  hosts: all
+  gather_facts: true
+  vars:
+    seuil_alerte: 80
+  tasks:
+    - name: Récupérer les infos disque
+      ansible.builtin.setup:
+        filter: ansible_mounts
+    - name: Vérifier chaque partition
+      ansible.builtin.debug:
+        msg: >
+          {% if (item.size_total - item.size_available) / item.size_total * 100 > seuil_alerte %}
+          ⚠️ ALERTE : {{ item.mount }} utilise
+          {{ ((item.size_total - item.size_available) / item.size_total * 100) | round(1) }}%
+          {% else %}
+          ✅ OK : {{ item.mount }} utilise
+          {{ ((item.size_total - item.size_available) / item.size_total * 100) | round(1) }}%
+          {% endif %}
+      loop: "{{ ansible_mounts }}"
+      when: item.size_total > 0
