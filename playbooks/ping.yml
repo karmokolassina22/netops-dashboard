@@ -1,0 +1,12 @@
+---
+- name: Test de connectivité (ping)
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: Ping toutes les machines
+      ansible.builtin.ping:
+      register: ping_result
+    - name: Afficher le résultat
+      ansible.builtin.debug:
+        msg: "✅ Machine {{ inventory_hostname }} est joignable"
+      when: ping_result is succeeded
