@@ -1,0 +1,26 @@
+---
+- name: Déploiement de Nginx
+  hosts: webservers
+  become: true
+  vars:
+    service_name: nginx
+  tasks:
+    - name: Installer Nginx
+      ansible.builtin.apt:
+        name: nginx
+        state: present
+        update_cache: true
+    - name: Démarrer et activer Nginx
+      ansible.builtin.systemd:
+        name: "{{ service_name }}"
+        state: started
+        enabled: true
+    - name: Vérifier que Nginx répond
+      ansible.builtin.uri:
+        url: "http://localhost"
+        status_code: 200
+      register: result
+    - name: Confirmer le déploiement
+      ansible.builtin.debug:
+        msg: "✅ Nginx déployé sur {{ inventory_hostname }}"
+      when: result.status == 200
