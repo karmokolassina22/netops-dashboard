@@ -1,0 +1,16 @@
+version: "3.9"
+
+services:
+  backend:
+    build: .
+    container_name: netops-backend
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./playbooks:/app/playbooks
+      - ./inventory:/app/inventory
+      - ~/.ssh:/root/.ssh:ro
+    environment:
+      - FLASK_ENV=development
+      - SECRET_KEY=netops-dev-key
+    restart: unless-stopped
