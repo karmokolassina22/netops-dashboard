@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NetOps Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-icon">⚡</span>
+      <span class="logo-text">NetOps</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="#" class="nav-item active" data-tab="dashboard">
+        <span class="nav-icon">📊</span> Dashboard
+      </a>
+      <a href="#" class="nav-item" data-tab="playbooks">
+        <span class="nav-icon">🤖</span> Playbooks
+      </a>
+      <a href="#" class="nav-item" data-tab="inventory">
+        <span class="nav-icon">🖥️</span> Inventaire
+      </a>
+      <a href="#" class="nav-item" data-tab="history">
+        <span class="nav-icon">📋</span> Historique
+      </a>
+    </nav>
+    <div class="sidebar-status">
+      <div class="ws-indicator" id="wsIndicator">
+        <span class="ws-dot"></span>
+        <span id="wsStatus">Connexion...</span>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <h1 id="pageTitle">Dashboard</h1>
+        <span class="topbar-sub">Infrastructure Automation Tool</span>
+      </div>
+      <div class="topbar-right">
+        <span class="date" id="currentDate"></span>
+        <div class="user-badge">LK</div>
+      </div>
+    </header>
+
+    <!-- DASHBOARD -->
+    <div class="tab-content active" id="tab-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">🤖</div>
+          <div class="stat-info">
+            <div class="stat-value" id="statPlaybooks">0</div>
+            <div class="stat-label">Playbooks</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🖥️</div>
+          <div class="stat-info">
+            <div class="stat-value" id="statMachines">0</div>
+            <div class="stat-label">Machines</div>
+          </div>
+        </div>
+        <div class="stat-card success-card">
+          <div class="stat-icon">✅</div>
+          <div class="stat-info">
+            <div class="stat-value" id="statSuccess">0</div>
+            <div class="stat-label">Succès</div>
+          </div>
+        </div>
+        <div class="stat-card error-card">
+          <div class="stat-icon">❌</div>
+          <div class="stat-info">
+            <div class="stat-value" id="statFailed">0</div>
+            <div class="stat-label">Échecs</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <h2>🚀 Lancement rapide</h2>
+          <span class="panel-sub">Sélectionne et lance un playbook</span>
+        </div>
+        <div class="panel-body">
+          <div class="launch-form">
+            <div class="form-group">
+              <label>Playbook</label>
+              <select id="playbookSelect" class="select">
+                <option value="">-- Chargement... --</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Description</label>
+              <div class="desc-box" id="playbookDesc">
+                Sélectionne un playbook pour voir sa description
+              </div>
+            </div>
+            <button class="btn-run" id="btnRun" onclick="runPlaybook()">
+              <span id="btnText">▶ Lancer</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <h2>🖥️ Terminal — Logs en temps réel</h2>
+          <button class="btn-clear" onclick="clearLogs()">Effacer</button>
+        </div>
+        <div class="terminal" id="terminal">
+          <div class="terminal-line info">
+            <span class="terminal-prompt">$</span>
+            Bienvenue sur NetOps Dashboard. Lance un playbook pour voir les logs.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PLAYBOOKS -->
+    <div class="tab-content" id="tab-playbooks">
+      <div class="panel">
+        <div class="panel-header"><h2>🤖 Playbooks disponibles</h2></div>
+        <div class="panel-body">
+          <div class="playbooks-list" id="playbooksList">
+            <div class="loading">Chargement...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INVENTAIRE -->
+    <div class="tab-content" id="tab-inventory">
+      <div class="panel">
+        <div class="panel-header"><h2>🖥️ Inventaire des machines</h2></div>
+        <div class="panel-body">
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Nom</th><th>Adresse IP</th>
+                  <th>Groupe</th><th>Utilisateur</th><th>Statut</th>
+                </tr>
+              </thead>
+              <tbody id="inventoryBody">
+                <tr><td colspan="5" class="loading">Chargement...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HISTORIQUE -->
+    <div class="tab-content" id="tab-history">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>📋 Historique des exécutions</h2>
+          <button class="btn-clear" onclick="loadHistory()">↻ Actualiser</button>
+        </div>
+        <div class="panel-body">
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Job ID</th><th>Playbook</th>
+                  <th>Statut</th><th>Démarré</th><th>Terminé</th>
+                </tr>
+              </thead>
+              <tbody id="historyBody">
+                <tr><td colspan="5" class="loading">Aucune exécution</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
