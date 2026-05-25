@@ -259,7 +259,7 @@ fusionnée dans `main` quand elle est prête.
 ## 👤 Auteur
 
 **Ladji KARAMOKO**
-- 🌐 Portfolio : [franckaxxl59-tech.github.io](https://franckaxxl59-tech.github.io)
+- 🌐 Portfolio :https://karmokolassina22.github.io
 - 🎓 MSc – DevOps & Développement Web
 
 ---
