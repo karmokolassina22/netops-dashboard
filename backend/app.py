@@ -20,6 +20,10 @@ INVENTORY_FILE = os.path.join(os.path.dirname(__file__), "../inventory/hosts.ini
 @app.route("/")
 def index():
     return send_from_directory("../frontend", "index.html")
+    
+@app.route("/<path:filename>")
+def static_files(filename):
+    return send_from_directory("../frontend", filename)
 
 
 @app.route("/api/playbooks", methods=["GET"])
